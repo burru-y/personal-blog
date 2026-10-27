@@ -1,0 +1,47 @@
+---
+import { getCollection } from "astro:content";
+import Base from "../layouts/Base.astro";
+
+const posts = (await getCollection("posts", ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf(),
+);
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+
+function formatDate(date: Date) {
+  return date.toLocaleDateString("zh-CN", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    timeZone: "Asia/Shanghai",
+  });
+}
+---
+
+<Base title="廖呈睿 · 技术笔记" description="后端、部署与踩过的坑。">
+  <section class="hero">
+    <h1>廖呈睿</h1>
+    <p>
+      在写一个团队技术博客「欲晓」，顺手把踩过的坑记下来。
+      主要是后端、部署和那些「看起来能跑但会出错」的细节。
+    </p>
+  </section>
+
+  <ul class="post-list">
+    {
+      posts.map((post) => (
+        <li>
+          <a href={`${base}/posts/${post.id}/`}>
+            <span class="post-date">{formatDate(post.data.publishedAt)}</span>
+            <span>
+              <span class="post-title">{post.data.title}</span>
+              <span class="post-desc">{post.data.description}</span>
+            </span>
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+
+  {posts.length === 0 ? <p style="color: var(--muted)">还没有文章。</p> : null}
+</Base>
